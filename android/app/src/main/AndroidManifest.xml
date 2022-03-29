@@ -1,5 +1,5 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.example.blood_donation_app">
+    package="com.harshmishra.blood_donation_app">
      <uses-permission android:name="android.permission.INTERNET"/>
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.CAMERA" />
@@ -8,7 +8,7 @@
         android:label="blood_donation_app"
         android:icon="@mipmap/ic_launcher">
          <meta-data android:name="com.google.android.geo.API_KEY"
-            android:value="AIzaSyDkJ9_I63eZG-kKZtKOFPfTvDRv2VCRF7A"/>
+            android:value="AIzaSyA0gOwMox4dRKcnAyLedbS5ex0RcbK1PGI"/>
         <activity
             android:name=".MainActivity"
             android:launchMode="singleTop"

@@ -1,18 +1,19 @@
 import 'dart:async';
+
 import 'dart:typed_data';
 import 'dart:ui' as ui;
-
 import 'package:blood_donation_app/screen/request_blood.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:url_launcher/url_launcher.dart' as UrlLauncher;
-import 'package:permission_handler/permission_handler.dart';
 import '../utils/custom_dialogs.dart';
 import '../utils/custom_ripple_indicator.dart';
+import 'be_a_donor.dart';
 
 class MapView extends StatefulWidget {
   const MapView({Key? key}) : super(key: key);
@@ -22,6 +23,7 @@ class MapView extends StatefulWidget {
 }
 
 class _MapViewState extends State<MapView> {
+  final User? _currentUser = FirebaseAuth.instance.currentUser;
   late GoogleMapController _controller;
   late bool isMapCreated = false;
   late Position position;
@@ -41,40 +43,6 @@ class _MapViewState extends State<MapView> {
     populateClients();
     super.initState();
   }
-
-  // Future<void> getPermission() async {
-  //   PermissionStatus permission = await PermissionHandler()
-  //       .checkPermissionStatus(PermissionGroup.location);
-
-  //   if (permission == PermissionStatus.denied) {
-  //     await PermissionHandler()
-  //         .requestPermissions([PermissionGroup.locationAlways]);
-  //   }
-
-  //   var geolocator = Geolocator();
-
-  //   GeolocationStatus geolocationStatus =
-  //       await geolocator.checkGeolocationPermissionStatus();
-
-  //   switch (geolocationStatus) {
-  //     case GeolocationStatus.disabled:
-  //       showToast('Disabled');
-  //       break;
-  //     case GeolocationStatus.restricted:
-  //       showToast('Restricted');
-  //       break;
-  //     case GeolocationStatus.denied:
-  //       showToast('Denid');
-  //       break;
-  //     case GeolocationStatus.unknown:
-  //       showToast('Unknown');
-  //       break;
-  //     case GeolocationStatus.granted:
-  //       showToast('Granded');
-  //       _getCurrentLocation();
-  //       break;
-  //   }
-  // }
 
   Future<void> _fetchrequestName(requestId) async {
     Map<String, dynamic> _userInfo;
@@ -97,7 +65,9 @@ class _MapViewState extends State<MapView> {
         .then((docs) {
       if (docs.docs.isNotEmpty) {
         for (int i = 0; i < docs.docChanges.length; ++i) {
-          initMarker(docs.docs[i].data(), docs.docs[i].id);
+          if (_currentUser!.uid != docs.docs[i].data()["uid"]) {
+            initMarker(docs.docs[i].data(), docs.docs[i].id);
+          }
         }
       }
     });
@@ -106,7 +76,6 @@ class _MapViewState extends State<MapView> {
   void initMarker(request, requestId) {
     var markerIdVal = requestId;
     final MarkerId markerId = MarkerId(markerIdVal);
-    // creating a new MARKER
     final Marker marker = Marker(
         markerId: markerId,
         position:
@@ -156,7 +125,7 @@ class _MapViewState extends State<MapView> {
                                     fontSize: 18.0, color: Colors.black87),
                               ),
                               Text(
-                                "Quantity: " + request['quantity'] + " L",
+                                "Quantity: " + request['quantity'] + " ml",
                                 style: const TextStyle(
                                     fontSize: 14.0, color: Colors.black87),
                               ),
@@ -288,11 +257,34 @@ class _MapViewState extends State<MapView> {
             getJsonFile('assets/customStyle.json').then(setmapstyle);
           },
         ),
+        Positioned(
+          top: 640,
+          left: 85,
+          child: Container(
+            width: 220.0,
+            padding: const EdgeInsets.all(8.0),
+            child: FloatingActionButton.extended(
+              heroTag: "btn1",
+              backgroundColor: const Color.fromARGB(1000, 221, 46, 68),
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const BeADonor(),
+                  ),
+                );
+              },
+              icon: const Icon(FontAwesomeIcons.burn),
+              label: const Text("Be a Donor"),
+            ),
+          ),
+        ),
         Align(
           alignment: Alignment.bottomCenter,
           child: Padding(
             padding: const EdgeInsets.all(8.0),
             child: FloatingActionButton.extended(
+              heroTag: "btn2",
               backgroundColor: const Color.fromARGB(1000, 221, 46, 68),
               onPressed: () {
                 Navigator.push(
@@ -302,7 +294,7 @@ class _MapViewState extends State<MapView> {
                             position.latitude, position.longitude)));
               },
               icon: const Icon(FontAwesomeIcons.burn),
-              label: const Text("Request Blood"),
+              label: const Text("Request For Blood"),
             ),
           ),
         )

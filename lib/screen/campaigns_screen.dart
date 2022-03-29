@@ -1,13 +1,11 @@
+import 'package:auto_size_text/auto_size_text.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:image_picker/image_picker.dart';
-import 'package:firebase_storage/firebase_storage.dart';
-import 'dart:io';
-
-import '../utils/custom_dialogs.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 class CampaignsPage extends StatefulWidget {
   const CampaignsPage({Key? key}) : super(key: key);
@@ -17,111 +15,30 @@ class CampaignsPage extends StatefulWidget {
 }
 
 class _CampaignsPageState extends State<CampaignsPage> {
-  final ImagePicker _picker = ImagePicker();
-  late User currentUser;
-  final formkey = GlobalKey<FormState>();
-  late String _text, _name;
-  @override
-  void initState() {
-    super.initState();
-    _loadCurrentUser();
-  }
+  List<String> campaignsName = [];
+  List<String> location = [];
+  List<String> image = [];
+  List<String> phoneNumber = [];
 
-  bool isLoggedIn() {
-    if (FirebaseAuth.instance.currentUser! != null) {
-      return true;
-    } else {
-      return false;
-    }
-  }
+  late Widget _child;
 
-  Future<void> addData(_user) async {
-    if (isLoggedIn()) {
-      FirebaseFirestore.instance
-          .collection('Campaign Details')
-          .doc()
-          .set(_user)
-          .catchError((e) {
-        print(e);
-      });
-    } else {
-      print('You need to be logged In');
-    }
-  }
-
-  void _loadCurrentUser() {
-    currentUser = FirebaseAuth.instance.currentUser!;
-  }
-
-  Future<Future> dialogTrigger(BuildContext context) async {
-    return showDialog(
-        context: context,
-        barrierDismissible: false,
-        builder: (BuildContext context) {
-          return AlertDialog(
-            title: const Text('Success'),
-            content: const Text('Post Submitted'),
-            actions: <Widget>[
-              FlatButton(
-                onPressed: () {
-                  formkey.currentState!.reset();
-                  Navigator.pop(context);
-                  Navigator.pushReplacement(
-                      context,
-                      MaterialPageRoute(
-                          builder: (context) => const CampaignsPage()));
-                },
-                child: const Icon(
-                  Icons.arrow_forward,
-                  color: Color.fromARGB(1000, 221, 46, 68),
-                ),
-              ),
-            ],
-          );
-        });
-  }
-
-  late XFile _image;
-  String _path = "";
-
-  Future getImage(bool isCamera) async {
-    XFile? image;
-    String path;
-    if (isCamera) {
-      image = await _picker.pickImage(source: ImageSource.camera);
-      path = image!.path;
-    } else {
-      image = await _picker.pickImage(source: ImageSource.gallery);
-      path = image!.path;
-    }
+  Future<void> getCampaigns() async {
+    await FirebaseFirestore.instance.collection('campaigns').get().then((docs) {
+      if (docs.docs.isNotEmpty) {
+        for (int i = 0; i < docs.docs.length; ++i) {
+          campaignsName.add(docs.docs[i].data()['name']);
+          location.add(docs.docs[i].data()['location']);
+          image.add(docs.docs[i].data()['image']);
+          phoneNumber.add(docs.docs[i].data()['phoneNumber']);
+        }
+      }
+    });
     setState(() {
-      _image = image!;
-      _path = path;
+      _child = myWidget();
     });
   }
 
-  Future<String> uploadImage() async {
-    String downloadUrl = "";
-    User user = FirebaseAuth.instance.currentUser!;
-    Reference storageReference = FirebaseStorage.instance
-        .ref()
-        .child('campaignposters/${user.uid}/$_name.jpg');
-    UploadTask uploadTask = storageReference.putFile(File(_path));
-
-    await uploadTask.then((res) async {
-      downloadUrl = await res.ref.getDownloadURL();
-    });
-
-    return downloadUrl;
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    SystemChrome.setSystemUIOverlayStyle(const SystemUiOverlayStyle(
-      statusBarColor: Colors.transparent, //top bar color
-      systemNavigationBarColor: Colors.black, //bottom bar color
-      systemNavigationBarIconBrightness: Brightness.dark,
-    ));
+  Widget myWidget() {
     return Scaffold(
       resizeToAvoidBottomInset: false,
       backgroundColor: const Color.fromARGB(1000, 221, 46, 68),
@@ -129,11 +46,10 @@ class _CampaignsPageState extends State<CampaignsPage> {
         elevation: 0.0,
         centerTitle: true,
         backgroundColor: Colors.transparent,
-        title: const Text(
+        title: Text(
           "Campaigns",
-          style: TextStyle(
-            fontSize: 60.0,
-            fontFamily: "SouthernAire",
+          style: GoogleFonts.rubik(
+            fontSize: 35.0,
             color: Colors.white,
           ),
         ),
@@ -152,124 +68,107 @@ class _CampaignsPageState extends State<CampaignsPage> {
           height: 800.0,
           width: double.infinity,
           color: Colors.white,
-        ),
-      ),
-      floatingActionButton: Align(
-        alignment: Alignment.bottomRight,
-        child: Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: FloatingActionButton(
-            backgroundColor: const Color.fromARGB(1000, 221, 46, 68),
-            child: const Icon(
-              FontAwesomeIcons.pen,
-              color: Colors.white,
-            ),
-            onPressed: () {
-              showDialog(
-                context: context,
-                builder: (_) => AlertDialog(
-                  title: const Text("Make a post about your campaign"),
-                  content: Form(
-                    key: formkey,
-                    child: SingleChildScrollView(
+          child: Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: ListView.builder(
+                itemCount: campaignsName.length,
+                itemBuilder: (ctx, index) {
+                  return Container(
+                    margin: EdgeInsets.all(
+                      25,
+                    ),
+                    child: Card(
+                      elevation: 0,
+                      color: Colors.white,
                       child: Column(
-                        mainAxisAlignment: MainAxisAlignment.start,
-                        children: <Widget>[
-                          Padding(
-                            padding: const EdgeInsets.all(5.0),
-                            child: TextFormField(
-                              decoration: const InputDecoration(
-                                hintText: 'Organisation name',
-                                icon: Icon(
-                                  FontAwesomeIcons.user,
-                                  color: Color.fromARGB(1000, 221, 46, 68),
-                                ),
-                              ),
-                              validator: (value) => value!.isEmpty
-                                  ? "This field can't be empty"
-                                  : null,
-                              onSaved: (value) => _name = value!,
-                              keyboardType: TextInputType.multiline,
+                        children: [
+                          ClipRRect(
+                            borderRadius: BorderRadius.circular(
+                              15.0,
+                            ),
+                            child: CachedNetworkImage(
+                              fit: BoxFit.cover,
+                              imageUrl: image[index],
+                              height: 180,
+                              width: 500,
                             ),
                           ),
-                          Padding(
-                            padding: const EdgeInsets.all(5.0),
-                            child: TextFormField(
-                              decoration: const InputDecoration(
-                                hintText: 'Wite something here',
-                                icon: Icon(
-                                  FontAwesomeIcons.pen,
-                                  color: Color.fromARGB(1000, 221, 46, 68),
+                          ListTile(
+                            title: Container(
+                              margin: const EdgeInsets.only(
+                                bottom: 7,
+                                top: 7,
+                              ),
+                              child: AutoSizeText(
+                                campaignsName[index],
+                                maxLines: 2,
+                                style: GoogleFonts.poppins(
+                                  color: Colors.black,
+                                  fontSize: 15,
+                                  fontWeight: FontWeight.w400,
                                 ),
                               ),
-                              validator: (value) => value!.isEmpty
-                                  ? "This field can't be empty"
-                                  : null,
-                              onSaved: (value) => _text = value!,
-                              keyboardType: TextInputType.multiline,
-                              maxLength: 120,
+                            ),
+                            subtitle: Column(
+                              children: [
+                                Container(
+                                  margin: const EdgeInsets.only(
+                                    bottom: 7,
+                                  ),
+                                  child: AutoSizeText(
+                                    location[index],
+                                    maxLines: 2,
+                                    overflow: TextOverflow.ellipsis,
+                                    softWrap: false,
+                                    style: GoogleFonts.poppins(
+                                      color: Colors.black54,
+                                      fontSize: 15,
+                                    ),
+                                  ),
+                                ),
+                                Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
+                                  children: <Widget>[
+                                    Expanded(
+                                      child: AutoSizeText(
+                                        phoneNumber[index],
+                                        maxLines: 1,
+                                        style: GoogleFonts.poppins(
+                                          color: Colors.black54,
+                                          fontSize: 13,
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                )
+                              ],
                             ),
                           ),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                            children: <Widget>[
-                              IconButton(
-                                  icon: const Icon(Icons.camera_alt),
-                                  onPressed: () {
-                                    getImage(true);
-                                  }),
-                              IconButton(
-                                  icon: const Icon(Icons.filter),
-                                  onPressed: () {
-                                    getImage(false);
-                                  }),
-                            ],
-                          ),
-                          _path.isEmpty
-                              ? const SizedBox()
-                              : Image.file(
-                                  File(_path),
-                                  height: 150.0,
-                                  width: 150.0,
-                                ),
                         ],
                       ),
                     ),
-                  ),
-                  actions: <Widget>[
-                    RaisedButton(
-                      color: const Color.fromARGB(1000, 221, 46, 68),
-                      onPressed: () async {
-                        if (!formkey.currentState!.validate()) return;
-                        formkey.currentState!.save();
-                        CustomDialogs.progressDialog(
-                            context: context, message: 'Uploading');
-                        var url = await uploadImage();
-                        Navigator.of(context).pop();
-                        final Map<String, dynamic> campaignDetails = {
-                          'uid': currentUser.uid,
-                          'content': _text,
-                          'image': url,
-                          'name': _name,
-                        };
-                        addData(campaignDetails).then((result) {
-                          dialogTrigger(context);
-                        }).catchError((e) {
-                          print(e);
-                        });
-                      },
-                      child: const Text(
-                        'POST',
-                        style: TextStyle(color: Colors.white),
-                      ),
-                    ),
-                  ],
-                ),
-              );
-            },
+                  );
+                }),
           ),
         ),
       ),
     );
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    getCampaigns();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    SystemChrome.setSystemUIOverlayStyle(const SystemUiOverlayStyle(
+      statusBarColor: Colors.transparent,
+      systemNavigationBarColor: Colors.black,
+      systemNavigationBarIconBrightness: Brightness.dark,
+    ));
+    return _child;
   }
 }

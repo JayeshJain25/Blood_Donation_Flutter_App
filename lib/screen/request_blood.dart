@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:geocoding/geocoding.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 class RequestBlood extends StatefulWidget {
   late double _lat, _lng;
@@ -129,11 +130,10 @@ class _RequestBloodState extends State<RequestBlood> {
         elevation: 0.0,
         centerTitle: true,
         backgroundColor: Colors.transparent,
-        title: const Text(
-          "Request Blood",
-          style: TextStyle(
-            fontSize: 50.0,
-            fontFamily: "SouthernAire",
+        title: Text(
+          "Request For Blood",
+          style: GoogleFonts.rubik(
+            fontSize: 30.0,
             color: Colors.white,
           ),
         ),
@@ -209,9 +209,17 @@ class _RequestBloodState extends State<RequestBlood> {
                               color: Color.fromARGB(1000, 221, 46, 68),
                             ),
                           ),
-                          validator: (value) => value!.isEmpty
-                              ? "Quantity field can't be empty"
-                              : null,
+                          validator: (value) {
+                            if (value!.isEmpty) {
+                              return "Quantity field can't be empty";
+                            }
+
+                            if (int.parse(value) > 300) {
+                              return "Blood unit can't be greater than 300 ml";
+                            }
+
+                            return null;
+                          },
                           onSaved: (value) => _qty = value!,
                           keyboardType: TextInputType.number,
                         ),

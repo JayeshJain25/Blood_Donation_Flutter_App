@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:blood_donation_app/screen/auth.dart';
 import 'package:blood_donation_app/screen/home_screen.dart';
+import 'package:blood_donation_app/screen/phone_number_auth.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
@@ -47,7 +48,7 @@ class _SplashScreenState extends State<SplashScreen>
       context,
       MaterialPageRoute(
         builder: (context) =>
-            currentUser == null ? AuthPage(appAuth) : const HomeScreen(),
+            currentUser == null ? const PhoneNumberAuth() : const HomeScreen(),
       ),
     );
   }

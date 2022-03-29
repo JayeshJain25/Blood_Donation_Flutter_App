@@ -78,7 +78,7 @@ class _AuthPageState extends State<AuthPage> {
             SizedBox(
               child: Center(
                 child: Text(
-                  "LifeShare",
+                  "Blood Donation",
                   style: GoogleFonts.rubik(
                     fontSize: 50.0,
                     color: Colors.white,
