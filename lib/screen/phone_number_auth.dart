@@ -4,6 +4,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 import 'home_screen.dart';
 
@@ -152,12 +153,20 @@ class _PhoneNumberState extends State<PhoneNumberAuth> {
     Size size = MediaQuery.of(context).size;
     return Scaffold(
         appBar: AppBar(
-          title: const Text("Verify OTP"),
-          backwardsCompatibility: false,
+          centerTitle: true,
+          backgroundColor: Colors.transparent,
+          elevation: 0,
+          title: Text(
+            "Login to OneBlood",
+            style: GoogleFonts.rubik(
+              color: Colors.black,
+              fontSize: 25,
+            ),
+          ),
           systemOverlayStyle:
               const SystemUiOverlayStyle(statusBarColor: Colors.blue),
         ),
-        backgroundColor: Colors.redAccent,
+        backgroundColor: Colors.white,
         body: Center(
           child: Form(
             key: _formKey,
@@ -166,52 +175,71 @@ class _PhoneNumberState extends State<PhoneNumberAuth> {
               children: [
                 SizedBox(
                   width: size.width * 0.8,
-                  child: TextFormField(
-                      keyboardType: TextInputType.phone,
-                      controller: phoneNumber,
-                      decoration: InputDecoration(
-                        labelText: "Enter Phone",
-                        contentPadding: const EdgeInsets.symmetric(
-                            vertical: 15.0, horizontal: 10.0),
-                        border: border,
-                      )),
+                  child: Material(
+                    elevation: 10.0,
+                    shadowColor: Colors.grey.shade300,
+                    borderRadius: BorderRadius.circular(25.0),
+                    child: TextFormField(
+                        keyboardType: TextInputType.phone,
+                        controller: phoneNumber,
+                        decoration: InputDecoration(
+                          labelText: "Enter Phone",
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(25.0),
+                          ),
+                          contentPadding: const EdgeInsets.symmetric(
+                              vertical: 15.0, horizontal: 10.0),
+                        )),
+                  ),
                 ),
                 SizedBox(
                   height: size.height * 0.01,
                 ),
-                Container(
-                  padding: const EdgeInsets.symmetric(vertical: 16.0),
-                  alignment: Alignment.center,
-                  child: RaisedButton(
-                    color: Colors.greenAccent[400],
-                    child: const Text("Verify Number"),
-                    onPressed: () async {
-                      phoneSignIn(
-                        phoneNumber: phoneNumber.text,
-                      );
-                    },
-                  ),
+                ElevatedButton(
+                  child: Text("Verify Number",
+                      style: const TextStyle(fontSize: 14)),
+                  style: ButtonStyle(
+                      foregroundColor:
+                          MaterialStateProperty.all<Color>(Colors.white),
+                      backgroundColor:
+                          MaterialStateProperty.all<Color>(Colors.red),
+                      shape: MaterialStateProperty.all<RoundedRectangleBorder>(
+                          RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(5),
+                              side: const BorderSide(color: Colors.red)))),
+                  onPressed: () async {
+                    phoneSignIn(
+                      phoneNumber: phoneNumber.text,
+                    );
+                  },
                 ),
                 SizedBox(
                   height: size.height * 0.01,
                 ),
                 SizedBox(
                   width: size.width * 0.8,
-                  child: TextFormField(
-                    keyboardType: TextInputType.number,
-                    controller: otpCode,
-                    obscureText: true,
-                    decoration: InputDecoration(
-                      labelText: "Enter Otp",
-                      contentPadding: const EdgeInsets.symmetric(
-                          vertical: 15.0, horizontal: 10.0),
-                      border: border,
-                      suffixIcon: const Padding(
-                        child: FaIcon(
-                          FontAwesomeIcons.eye,
-                          size: 15,
+                  child: Material(
+                    elevation: 10.0,
+                    shadowColor: Colors.grey.shade300,
+                    borderRadius: BorderRadius.circular(25.0),
+                    child: TextFormField(
+                      keyboardType: TextInputType.number,
+                      controller: otpCode,
+                      obscureText: true,
+                      decoration: InputDecoration(
+                        labelText: "Enter Otp",
+                        contentPadding: const EdgeInsets.symmetric(
+                            vertical: 15.0, horizontal: 10.0),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(25.0),
                         ),
-                        padding: EdgeInsets.only(top: 15, left: 15),
+                        suffixIcon: const Padding(
+                          child: FaIcon(
+                            FontAwesomeIcons.eye,
+                            size: 15,
+                          ),
+                          padding: EdgeInsets.only(top: 15, left: 15),
+                        ),
                       ),
                     ),
                   ),
@@ -232,12 +260,13 @@ class _PhoneNumberState extends State<PhoneNumberAuth> {
                           },
                           child: const Text("Login"),
                           style: ButtonStyle(
-                              foregroundColor: MaterialStateProperty.all<Color>(
-                                  Colors.white),
-                              backgroundColor: MaterialStateProperty.all<Color>(
-                                  Colors.purpleAccent),
-                              side: MaterialStateProperty.all<BorderSide>(
-                                  BorderSide.none)),
+                            foregroundColor:
+                                MaterialStateProperty.all<Color>(Colors.white),
+                            backgroundColor:
+                                MaterialStateProperty.all<Color>(Colors.red),
+                            side: MaterialStateProperty.all<BorderSide>(
+                                BorderSide.none),
+                          ),
                         ),
                       )
                     : const CircularProgressIndicator(),

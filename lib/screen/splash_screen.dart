@@ -5,6 +5,7 @@ import 'package:blood_donation_app/screen/home_screen.dart';
 import 'package:blood_donation_app/screen/phone_number_auth.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({Key? key}) : super(key: key);
@@ -20,24 +21,6 @@ class _SplashScreenState extends State<SplashScreen>
   final FirebaseAuth appAuth = FirebaseAuth.instance;
   @override
   void initState() {
-    _logoController = AnimationController(
-      vsync: this,
-      duration: const Duration(seconds: 2),
-    );
-
-    _logoAnimation = CurvedAnimation(
-      parent: _logoController,
-      curve: Curves.easeIn,
-    );
-
-    _logoAnimation.addListener(() {
-      if (_logoAnimation.status == AnimationStatus.completed) {
-        return;
-      }
-      setState(() {});
-    });
-
-    _logoController.forward();
     super.initState();
     startTime();
   }
@@ -66,12 +49,28 @@ class _SplashScreenState extends State<SplashScreen>
   Widget build(BuildContext context) {
     return Scaffold(
       body: Center(
-        child: SizedBox(
-          height: _logoAnimation.value * 250.0,
-          width: _logoAnimation.value * 250.0,
-          child: Image.asset(
-            "assets/logo.png",
-          ),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            SizedBox(
+              height: 250.0,
+              width: 250.0,
+              child: Image.asset(
+                "assets/logo.png",
+              ),
+            ),
+            const SizedBox(
+              height: 50,
+            ),
+            Text(
+              "OneBlood",
+              style: GoogleFonts.rubik(fontSize: 25, color: Color(0xFFa50c18)),
+            ),
+            Text(
+              "Blood Donation App",
+              style: GoogleFonts.rubik(fontSize: 25),
+            )
+          ],
         ),
       ),
     );
